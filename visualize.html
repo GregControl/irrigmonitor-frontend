@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Simulation</title>
+
+  <!-- Chart.js and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+    <div class="tab" onclick="showTab('post')">Submit User Data</div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard" class="tab-content active">
+    <div class="dashboard">
+      <!-- Dials -->
+      <div class="dials-panel">
+        <div class="dial-container"><canvas id="dial1"></canvas><p></p></div>
+        <div class="dial-container"><canvas id="dial2"></canvas><p></p></div>
+        <div class="dial-container"><canvas id="dial3"></canvas><p></p></div>
+        <div class="dial-container"><canvas id="dial4"></canvas><p></p></div>
+      </div>
+
+      <!-- Graphs -->
+      <div class="graphs-panel">
+        <div class="graph-container"><h3>Milimeters of rain</h3><canvas id="rainfallGraph"></canvas></div>
+        <div class="graph-container"><h3>Hours of irrigation</h3><canvas id="irrigationGraph"></canvas></div>
+        <div class="graph-container soil-moisture-container">
+          <h3>Soil Moisture</h3>
+          <div class="dropdown-container">
+            <select id="soilMoistureLevel">
+              <option value="1">2" Soil Moisture</option>
+              <option value="2">6" Soil Moisture</option>
+              <option value="3">10" Soil Moisture</option>
+              <option value="4">14" Soil Moisture</option>
+            </select>
+          </div>
+          <canvas id="soilMoistureGraph"></canvas>
+        </div>
+        <div class="graph-container"><h3>Milimeters of potential evapotranspiration</h3><canvas id="evapotranspirationGraph"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM VIEW -->
+  <div id="post" class="tab-content">
+    <div class="form-container">
+      <p>This is a simulation. The form view is not active here.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { showTab, initUI } from './js/ui.js';
+    import { createDials } from './js/charts/dials.js';
+    import {
+      createRainfallGraph,
+      createIrrigationGraph,
+      createEvapotranspirationGraph,
+      updateSoilMoistureGraph
+    } from './js/charts/timeseries.js';
+
+    // Enable tab switching
+    window.showTab = showTab;
+    initUI();
+
+    // Generate 100 hourly timestamps
+    const now = new Date();
+    const timestamps = Array.from({ length: 100 }, (_, i) =>
+      new Date(now.getTime() - (99 - i) * 3600 * 1000)
+    );
+
+    // Smooth synthetic data
+    function generateData(length, amplitude = 10, variation = 5) {
+      return Array.from({ length }, (_, i) => {
+        return amplitude * Math.sin(i / 10) + variation * Math.random();
+      });
+    }
+
+    const syntheticRain = generateData(100, 5, 3);
+    const syntheticIrrigation = generateData(100, 10, 4);
+    const syntheticET = generateData(100, 7, 2);
+
+    const syntheticSoilMoisture = Array.from({ length: 100 }, (_, i) => ({
+      timestamp: timestamps[i].toISOString(),
+      moisture_1: 50 + 10 * Math.sin(i / 20) + Math.random() * 5,
+      moisture_2: 7 + 8 * Math.sin(i / 25) + Math.random() * 4,
+      moisture_3: 18 + 6 * Math.sin(i / 30) + Math.random() * 3,
+      moisture_4: 2 + 5 * Math.sin(i / 35) + Math.random() * 2
+    }));
+
+    const fakeDSSData = {
+      irrimeter: { '1h': syntheticSoilMoisture },
+      davis: {
+        '1h': syntheticRain.map((val, i) => ({
+          measured_rain_mm_h: val,
+          potential_evapotranspiration_mm_h: syntheticET[i]
+        }))
+      },
+      campbell: {
+        '1h': syntheticIrrigation.map(val => ({ measurement: val }))
+      }
+    };
+
+    // Dials
+    const latest = syntheticSoilMoisture.at(-1);
+    const levels = [
+      latest.moisture_1,
+      latest.moisture_2,
+      latest.moisture_3,
+      latest.moisture_4
+    ];
+    createDials(levels, 5, 11, 100);
+
+    // Time Series Graphs
+    createRainfallGraph(timestamps, syntheticRain);
+    createIrrigationGraph(timestamps, syntheticIrrigation);
+    createEvapotranspirationGraph(timestamps, syntheticET);
+    updateSoilMoistureGraph(fakeDSSData);
+
+    // Dropdown interaction
+    document.getElementById('soilMoistureLevel').onchange = () => {
+      updateSoilMoistureGraph(fakeDSSData);
+    };
+  </script>
+</body>
+</html>

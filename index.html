@@ -1,0 +1,114 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>IrrigMonitor</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://forecastbucketsmart.s3.amazonaws.com/smartdrop2.png.webp" />
+
+    <!-- Chart.js and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+        <div class="tab" onclick="showTab('post')">Submit User Data</div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard" class="tab-content active">
+        <!-- LOADING SKELETON -->
+        <div id="loading" class="data-display">
+            <div class="skeleton-dashboard">
+                <div class="skeleton-dials-panel">
+                    <div class="skeleton-dial"></div>
+                    <div class="skeleton-dial"></div>
+                    <div class="skeleton-dial"></div>
+                    <div class="skeleton-dial"></div>
+                </div>
+                <div class="skeleton-graphs-panel">
+                    <div class="skeleton-graph"></div>
+                    <div class="skeleton-graph"></div>
+                    <div class="skeleton-graph"></div>
+                    <div class="skeleton-graph"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD -->
+        <div class="dashboard">
+            <!-- Dials -->
+            <div class="dials-panel">
+                <div class="dial-container"><canvas id="dial1"></canvas><p></p></div>
+                <div class="dial-container"><canvas id="dial2"></canvas><p></p></div>
+                <div class="dial-container"><canvas id="dial3"></canvas><p></p></div>
+                <div class="dial-container"><canvas id="dial4"></canvas><p></p></div>
+            </div>
+
+            <!-- Graphs -->
+      <div class="graphs-panel">
+        <div class="graph-container"><h3>Milimeters of rain</h3><canvas id="rainfallGraph"></canvas></div>
+        <div class="graph-container"><h3>Hours of irrigation</h3><canvas id="irrigationGraph"></canvas></div>
+        <div class="graph-container soil-moisture-container">
+          <h3>Soil Moisture</h3>
+          <div class="dropdown-container">
+            <select id="soilMoistureLevel">
+              <option value="1">2" Soil Moisture</option>
+              <option value="2">6" Soil Moisture</option>
+              <option value="3">10" Soil Moisture</option>
+              <option value="4">14" Soil Moisture</option>
+            </select>
+          </div>
+          <canvas id="soilMoistureGraph"></canvas>
+        </div>
+        <div class="graph-container"><h3>Milimeters of potential evapotranspiration</h3><canvas id="evapotranspirationGraph"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM VIEW -->
+    <div id="post" class="tab-content">
+        <div class="form-container">
+            <form id="postDataForm">
+                <h3>General Information</h3>
+                <div class="form-group"><label for="start_date">Start Date</label><input type="datetime-local" id="start_date" required/></div>
+
+                <h3>Davis Data</h3>
+                <div class="form-group"><label for="davisApiKey">API Key</label><input type="text" id="davisApiKey" required/></div>
+                <div class="form-group"><label for="davisSecretKey">Secret Key</label><input type="text" id="davisSecretKey" required/></div>
+                <div class="form-group"><label for="davisStation">Station ID</label><input type="text" id="davisStation" required/></div>
+
+                <h3>Irrimeter Data</h3>
+                <div class="form-group"><label for="irrimeterToken">Token</label><input type="text" id="irrimeterToken" required/></div>
+                <div class="form-group"><label for="irrimeterProbe">Probe ID</label><input type="text" id="irrimeterProbe" required/></div>
+
+                <h3>Campbell Data</h3>
+                <div class="form-group"><label for="campbellUser">Username</label><input type="text" id="campbellUser" required/></div>
+                <div class="form-group"><label for="campbellPass">Password</label><input type="password" id="campbellPass" required/></div>
+                <div class="form-group"><label for="campbellStation">Station ID</label><input type="text" id="campbellStation" required/></div>
+                <div class="form-group"><label for="campbellMeasurement">Measurement</label><input type="text" id="campbellMeasurement" value="resistance_avg@_15min" required/></div>
+
+                <h3>Weather Forecasting</h3>
+                <div class="form-group"><label for="latitude">Latitude</label><input type="text" id="latitude" required/></div>
+                <div class="form-group"><label for="longitude">Longitude</label><input type="text" id="longitude" required/></div>
+                <div class="form-group"><label for="forecastEndDate">Forecast End Date</label><input type="date" id="forecastEndDate" required/></div>
+
+                <div class="form-group"><button type="submit">Submit</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS MODULES (type="module" allows ES6 import/export) -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+/* styles.css */
+/* Centralized styling for dashboard layout, tabs, graphs, and form UI */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #1a2526;
+    color: white;
+  }
+  
+  .tabs {
+    display: flex;
+    cursor: pointer;
+    padding: 10px 20px;
+    background: #1a2526;
+  }
+  
+  .tab {
+    padding: 10px 20px;
+    background: #2a3738;
+    margin-right: 5px;
+    border-radius: 4px;
+    transition: background 0.3s;
+    color: white;
+  }
+  
+  .tab.active, .tab:hover {
+    background: #3a4748;
+  }
+  
+  .tab-content {
+    display: none;
+    height: calc(100vh - 60px);
+    width: 100%;
+  }
+  .tab-content.active {
+    display: block;
+  }
+  
+  .data-display {
+    background: #1a2526;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .dashboard {
+    display: flex;
+    height: 100%;
+    width: 97%;
+  }
+  
+  .dials-panel {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  .dial-container {
+    flex: none;
+    height: calc((100vh - 260px) / 4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #2a3738;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    position: relative;
+  }
+  
+  .dial-container canvas {
+    width: 100% !important;
+    max-height: 70%;
+  }
+  
+  .dial-container .percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    font-weight: bold;
+    text-shadow: 0 0 10px;
+  }
+  
+  .graphs-panel {
+    width: 85%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    padding: 10px;
+  }
+  
+  .graph-container {
+    flex: none;
+    height: calc((100vh - 260px) / 4);
+    background: #2a3738;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .graph-container:last-child {
+    margin-bottom: 0;
+  }
+  
+  .graph-container h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+  }
+  
+  .graph-container canvas {
+    flex: 1;
+    min-height: 100px;
+  }
+  
+  .soil-moisture-container {
+    height: calc((100vh - 260px) / 4 + 30px);
+  }
+  
+  .dropdown-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+  
+  select {
+    padding: 5px;
+    background: #2a3738;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+  }
+  
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #2a3738;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    height: calc(100% - 40px);
+  }
+  
+  .form-container h3 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #75c0c0;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+  }
+  
+  .form-group input,
+  .form-group button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 1em;
+  }
+  
+  .form-group input {
+    background: #3a4748;
+    color: white;
+    border: 1px solid #555;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #75c0c0;
+    box-shadow: 0 0 5px rgba(117, 192, 192, 0.5);
+  }
+  
+  .form-group button {
+    background: #75c0c0;
+    color: #1a2526;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
