@@ -2,7 +2,7 @@
 // Handles data fetching from your AWS backend
 
 export async function fetchDSSData(authToken, callback) {
-    const url = "https://u7oqof8x16.execute-api.us-east-1.amazonaws.com/prod/DSS";
+    const url = "https://u7oqof8x16.execute-api.us-east-1.amazonaws.com/prod/get-data";
     try {
       const response = await fetch(url, {
         method: 'GET',

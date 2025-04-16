@@ -1,5 +1,6 @@
 // charts/timeseries.js
 // Centralized time-series chart creation logic
+
 const AXIS_FONT_SIZE = 22;
 
 export const graphOptions = {
@@ -67,7 +68,7 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
               size: axisFontSize,
               weight: 'normal'
             },
-            maxTicksLimit: 5 // Y-axis with max 5 labels
+            maxTicksLimit: 5
           },
           grid: { color: 'rgba(255, 255, 255, 0.1)' }
         }
@@ -85,11 +86,19 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
           callbacks: {
             label: function (context) {
               let value = context.parsed.y;
+              const unit = window.selectedUnit || 'in'; // default to inches per hour
+              const unitSuffix = unit === 'mm' ? "mm/h" : "in/h";
               switch (canvasId) {
-                case 'rainfallGraph': return `Rainfall: ${value.toFixed(2)} mm`;
-                case 'irrigationGraph': return `Irrigation: ${value.toFixed(2)} mm`;
-                case 'evapotranspirationGraph': return `Evapotranspiration: ${value.toFixed(2)} mm`;
-                case 'soilMoistureGraph': return `Soil Moisture: ${value.toFixed(2)}%`;
+                case 'rainfallGraph':
+                  return `Rainfall: ${value.toFixed(2)} ${unitSuffix}`;
+                case 'evapotranspirationGraph':
+                  return `Evapotranspiration: ${value.toFixed(2)} ${unitSuffix}`;
+                case 'irrigationGraph':
+                  return `Irrigation: ${value.toFixed(2)} mm`;
+                case 'soilMoistureGraph':
+                  return `Soil Moisture: ${value.toFixed(2)}%`;
+                default:
+                  return `${value.toFixed(2)}`;
               }
             }
           }
@@ -101,37 +110,16 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
 
 export let rainfallChart, irrigationChart, evapotranspirationChart, soilMoistureChart;
 
-// Apply consistent axis font size = 20 for all graphs
 export function createRainfallGraph(timestamps, data) {
-  rainfallChart = createTimeSeriesGraph(
-    'rainfallGraph', 
-    timestamps, 
-    data, 
-    graphOptions.lineColor.rainfall, 
-    rainfallChart, 
-    'line', AXIS_FONT_SIZE);
+  rainfallChart = createTimeSeriesGraph('rainfallGraph', timestamps, data, graphOptions.lineColor.rainfall, rainfallChart, 'line', AXIS_FONT_SIZE);
 }
 
 export function createIrrigationGraph(timestamps, data) {
-  irrigationChart = createTimeSeriesGraph(
-    'irrigationGraph', 
-    timestamps, 
-    data, 
-    graphOptions.lineColor.irrigation, 
-    irrigationChart, 
-    'line', 
-    AXIS_FONT_SIZE);
+  irrigationChart = createTimeSeriesGraph('irrigationGraph', timestamps, data, graphOptions.lineColor.irrigation, irrigationChart, 'line', AXIS_FONT_SIZE);
 }
 
 export function createEvapotranspirationGraph(timestamps, data) {
-  evapotranspirationChart = createTimeSeriesGraph(
-    'evapotranspirationGraph', 
-    timestamps, 
-    data, 
-    graphOptions.lineColor.evapotranspiration, 
-    evapotranspirationChart, 
-    'line', 
-    AXIS_FONT_SIZE);
+  evapotranspirationChart = createTimeSeriesGraph('evapotranspirationGraph', timestamps, data, graphOptions.lineColor.evapotranspiration, evapotranspirationChart, 'line', AXIS_FONT_SIZE);
 }
 
 export function updateSoilMoistureGraph(dssData) {
@@ -140,12 +128,6 @@ export function updateSoilMoistureGraph(dssData) {
   const irrimeterData = dssData.irrimeter['1h'];
   const labels = irrimeterData.map(entry => new Date(entry.timestamp));
   const data = irrimeterData.map(entry => entry[`moisture_${level}`]);
-  soilMoistureChart = createTimeSeriesGraph(
-    'soilMoistureGraph', 
-    labels, 
-    data, 
-    graphOptions.lineColor.soilMoisture, 
-    soilMoistureChart, 
-    'line', 
-    AXIS_FONT_SIZE);
+  soilMoistureChart = createTimeSeriesGraph('soilMoistureGraph', labels, data, graphOptions.lineColor.soilMoisture, soilMoistureChart, 'line', AXIS_FONT_SIZE);
 }
+
