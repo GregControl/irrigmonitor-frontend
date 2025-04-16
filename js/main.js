@@ -33,6 +33,15 @@ function updateGraphHeaders() {
           .parentElement.querySelector('h3').textContent = `Potential Evapotranspiration (${unitSuffix})`;
 }
 
+// Update the last point label for a chart
+function setLastPointLabel(spanId, timestamps, data, valueSuffix = '') {
+  if (!timestamps.length || !data.length) return;
+  const lastTime = new Date(timestamps[timestamps.length - 1]);
+  const lastValue = data[data.length - 1];
+  const timeStr = lastTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById(spanId).textContent = `(${lastValue.toFixed(2)}${valueSuffix}, ${timeStr})`;
+}
+
 const authToken = getAuthToken();
 let dssData = null;
 
@@ -65,14 +74,25 @@ window.onload = () => {
     ];
 
     createDials(levels, 5, 11, 40);
-    const timestamps = irrimeterData.map(entry => new Date(entry.timestamp));
+    // Use each dataset's own timestamps for plotting
+    const irrimeterTimestamps = irrimeterData.map(entry => new Date(entry.timestamp));
+    const davisTimestamps = davisData.map(entry => new Date(entry.timestamp));
+    const campbellTimestamps = campbellData.map(entry => new Date(entry.timestamp));
     const factor = getConversionFactor();
-    // Convert rainfall and evapotranspiration data using factor
-    createRainfallGraph(timestamps, davisData.map(d => d.measured_rain_mm_h * factor));
-    createIrrigationGraph(timestamps, campbellData.map(d => d.measurement));
-    createEvapotranspirationGraph(timestamps, davisData.map(d => d.potential_evapotranspiration_mm_h * factor));
+    const rainfallData = davisData.map(d => d.measured_rain_mm_h * factor);
+    const irrigationData = campbellData.map(d => d.measurement);
+    const etData = davisData.map(d => d.potential_evapotranspiration_mm_h * factor);
+    const soilMoistureLevel = document.getElementById('soilMoistureLevel').value;
+    const soilMoistureData = irrimeterData.map(entry => entry[`moisture_${soilMoistureLevel}`]);
+    createRainfallGraph(davisTimestamps, rainfallData);
+    createIrrigationGraph(campbellTimestamps, irrigationData);
+    createEvapotranspirationGraph(davisTimestamps, etData);
     updateGraphHeaders();
     updateSoilMoistureGraph(dssData);
+    setLastPointLabel('rainfallLastPointTop', davisTimestamps, rainfallData, window.selectedUnit === 'mm' ? ' mm/h' : ' in/h');
+    setLastPointLabel('irrigationLastPointTop', campbellTimestamps, irrigationData, ' h/h');
+    setLastPointLabel('evapotranspirationLastPointTop', davisTimestamps, etData, window.selectedUnit === 'mm' ? ' mm/h' : ' in/h');
+    setLastPointLabel('soilMoistureLastPointTop', irrimeterTimestamps, soilMoistureData, '%');
   });
 
   attachFormListener(authToken);
@@ -81,6 +101,13 @@ window.onload = () => {
   // Update graph when soil moisture dropdown changes
   document.getElementById('soilMoistureLevel').onchange = () => {
     updateSoilMoistureGraph(dssData);
+    if (dssData && dssData.irrimeter && dssData.irrimeter['1h']) {
+      const irrimeterData = dssData.irrimeter['1h'];
+      const irrimeterTimestamps = irrimeterData.map(entry => new Date(entry.timestamp));
+      const level = document.getElementById('soilMoistureLevel').value;
+      const soilMoistureData = irrimeterData.map(entry => entry[`moisture_${level}`]);
+      setLastPointLabel('soilMoistureLastPointTop', irrimeterTimestamps, soilMoistureData, '%');
+    }
   };
 
   // Add listener for the unit toggle button
@@ -96,14 +123,21 @@ window.onload = () => {
     const factor = getConversionFactor();
     
     // If data is available, recalculate and update the rainfall and evapotranspiration graphs
-    if (dssData && dssData.davis && dssData.davis['1h'] && dssData.irrimeter && dssData.irrimeter['1h']) {
-      const timestamps = dssData.irrimeter['1h'].map(entry => new Date(entry.timestamp));
+    if (dssData && dssData.davis && dssData.davis['1h'] && dssData.irrimeter && dssData.irrimeter['1h'] && dssData.campbell && dssData.campbell['1h']) {
       const davisData = dssData.davis['1h'];
-      
-      createRainfallGraph(timestamps, davisData.map(d => d.measured_rain_mm_h * factor));
-      createEvapotranspirationGraph(timestamps, davisData.map(d => d.potential_evapotranspiration_mm_h * factor));
-      
+      const campbellData = dssData.campbell['1h'];
+      const davisTimestamps = davisData.map(entry => new Date(entry.timestamp));
+      const campbellTimestamps = campbellData.map(entry => new Date(entry.timestamp));
+      const rainfallData = davisData.map(d => d.measured_rain_mm_h * factor);
+      const irrigationData = campbellData.map(d => d.measurement);
+      const etData = davisData.map(d => d.potential_evapotranspiration_mm_h * factor);
+      createRainfallGraph(davisTimestamps, rainfallData);
+      createEvapotranspirationGraph(davisTimestamps, etData);
+      createIrrigationGraph(campbellTimestamps, irrigationData);
       updateGraphHeaders();
+      setLastPointLabel('rainfallLastPointTop', davisTimestamps, rainfallData, window.selectedUnit === 'mm' ? ' mm/h' : ' in/h');
+      setLastPointLabel('irrigationLastPointTop', campbellTimestamps, irrigationData, ' h/h');
+      setLastPointLabel('evapotranspirationLastPointTop', davisTimestamps, etData, window.selectedUnit === 'mm' ? ' mm/h' : ' in/h');
     }
   });
 };

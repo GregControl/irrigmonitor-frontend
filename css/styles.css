@@ -130,6 +130,7 @@ body, html {
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .graph-container:last-child {
@@ -288,5 +289,36 @@ select {
 
 .chartjs-tooltip {
   font-size: 14px;
+}
+
+.last-point-label {
+  color: #75c0c0;
+  font-size: 16px;
+  margin-top: 4px;
+  display: block;
+}
+
+.last-point-label-top, .last-point-label-bottom {
+  color: #75c0c0;
+  font-size: 15px;
+  font-weight: bold;
+  min-width: 120px;
+  text-align: right;
+  margin-bottom: 2px;
+  margin-top: 2px;
+}
+
+.last-point-label-top {
+  position: absolute;
+  right: 30px;
+  top: 10px;
+  z-index: 2;
+}
+
+.last-point-label-bottom {
+  position: absolute;
+  right: 30px;
+  bottom: 10px;
+  z-index: 2;
 }
 

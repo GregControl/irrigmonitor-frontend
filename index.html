@@ -59,9 +59,18 @@
 
             <!-- Graphs -->
       <div class="graphs-panel">
-        <div class="graph-container"><h3>Milimeters of rain</h3><canvas id="rainfallGraph"></canvas></div>
-        <div class="graph-container"><h3>Hours of irrigation</h3><canvas id="irrigationGraph"></canvas></div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="rainfallLastPointTop"></div>
+          <h3>Milimeters of rain</h3>
+          <canvas id="rainfallGraph"></canvas>
+        </div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="irrigationLastPointTop"></div>
+          <h3>Hours of irrigation</h3>
+          <canvas id="irrigationGraph"></canvas>
+        </div>
         <div class="graph-container soil-moisture-container">
+          <div class="last-point-label-top" id="soilMoistureLastPointTop"></div>
           <h3>Soil Moisture</h3>
           <div class="dropdown-container">
             <select id="soilMoistureLevel">
@@ -73,7 +82,11 @@
           </div>
           <canvas id="soilMoistureGraph"></canvas>
         </div>
-        <div class="graph-container"><h3>Milimeters of potential evapotranspiration</h3><canvas id="evapotranspirationGraph"></canvas></div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="evapotranspirationLastPointTop"></div>
+          <h3>Milimeters of potential evapotranspiration</h3>
+          <canvas id="evapotranspirationGraph"></canvas>
+        </div>
       </div>
     </div>
   </div>
