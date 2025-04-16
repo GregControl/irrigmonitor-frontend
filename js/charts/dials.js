@@ -1,6 +1,9 @@
 // charts/dials.js
 // Draws circular soil moisture gauges using Chart.js
 
+// Store Chart.js instances for each dial
+const dialCharts = {};
+
 /**
  * Creates a single soil moisture dial (semi-circular gauge).
  * 
@@ -23,6 +26,11 @@ export function createDial(canvasId, value, label, mawd, fc, maxValue) {
   // Remove old percentage text (if exists)
   const existing = container.querySelector('.percentage');
   if (existing) existing.remove();
+
+  // Destroy previous Chart.js instance if it exists
+  if (dialCharts[canvasId]) {
+    dialCharts[canvasId].destroy();
+  }
 
   // Scale values to 0–100%
   const scaledValue = (value / maxValue) * 100;
@@ -54,8 +62,8 @@ export function createDial(canvasId, value, label, mawd, fc, maxValue) {
   const labelP = container.querySelector('p');
   labelP.textContent = label;
 
-  // Create Chart.js dial
-  new Chart(ctx, {
+  // Create Chart.js dial and store reference
+  dialCharts[canvasId] = new Chart(ctx, {
     type: 'doughnut',
     data: {
       datasets: [
