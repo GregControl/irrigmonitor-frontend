@@ -35,9 +35,18 @@
 
       <!-- Graphs -->
       <div class="graphs-panel">
-        <div class="graph-container"><h3>Milimeters of rain</h3><canvas id="rainfallGraph"></canvas></div>
-        <div class="graph-container"><h3>Hours of irrigation</h3><canvas id="irrigationGraph"></canvas></div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="rainfallLastPointTop"></div>
+          <h3>Milimeters of rain</h3>
+          <canvas id="rainfallGraph"></canvas>
+        </div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="irrigationLastPointTop"></div>
+          <h3>Hours of irrigation</h3>
+          <canvas id="irrigationGraph"></canvas>
+        </div>
         <div class="graph-container soil-moisture-container">
+          <div class="last-point-label-top" id="soilMoistureLastPointTop"></div>
           <h3>Soil Moisture</h3>
           <div class="dropdown-container">
             <select id="soilMoistureLevel">
@@ -49,7 +58,11 @@
           </div>
           <canvas id="soilMoistureGraph"></canvas>
         </div>
-        <div class="graph-container"><h3>Milimeters of potential evapotranspiration</h3><canvas id="evapotranspirationGraph"></canvas></div>
+        <div class="graph-container">
+          <div class="last-point-label-top" id="evapotranspirationLastPointTop"></div>
+          <h3>Milimeters of potential evapotranspiration</h3>
+          <canvas id="evapotranspirationGraph"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -71,17 +84,15 @@
       updateSoilMoistureGraph
     } from './js/charts/timeseries.js';
 
-    // Enable tab switching
     window.showTab = showTab;
     initUI();
 
-    // Generate 100 hourly timestamps
+    // --- Synthetic/mock data generation (only this part is different from main.js) ---
     const now = new Date();
     const timestamps = Array.from({ length: 100 }, (_, i) =>
       new Date(now.getTime() - (99 - i) * 3600 * 1000)
     );
 
-    // Smooth synthetic data
     function generateData(length, amplitude = 10, variation = 5) {
       return Array.from({ length }, (_, i) => {
         return amplitude * Math.sin(i / 10) + variation * Math.random();
@@ -94,11 +105,18 @@
 
     const syntheticSoilMoisture = Array.from({ length: 100 }, (_, i) => ({
       timestamp: timestamps[i].toISOString(),
-      moisture_1: 50 + 10 * Math.sin(i / 20) + Math.random() * 5,
-      moisture_2: 7 + 8 * Math.sin(i / 25) + Math.random() * 4,
-      moisture_3: 18 + 6 * Math.sin(i / 30) + Math.random() * 3,
-      moisture_4: 2 + 5 * Math.sin(i / 35) + Math.random() * 2
+      moisture_1: 10 + 10 * Math.sin(i / 20) + Math.random() * 2, // 0-20 range
+      moisture_2: 8 + 8 * Math.sin(i / 25) + Math.random() * 2,   // 0-16 range
+      moisture_3: 6 + 6 * Math.sin(i / 30) + Math.random() * 2,   // 0-12 range
+      moisture_4: 4 + 4 * Math.sin(i / 35) + Math.random() * 2    // 0-8 range
     }));
+
+    const fakeSoil = {
+      "2":  { fc: 16, pwp: 2.3, mawd: 8 },
+      "6":  { fc: 14, pwp: 1.5, mawd: 7 },
+      "10": { fc: 12, pwp: 1.4, mawd: 6 },
+      "14": { fc: 10, pwp: 1.3, mawd: 5 }
+    };
 
     const fakeDSSData = {
       irrimeter: { '1h': syntheticSoilMoisture },
@@ -110,28 +128,53 @@
       },
       campbell: {
         '1h': syntheticIrrigation.map(val => ({ measurement: val }))
-      }
+      },
+      soil: fakeSoil
     };
 
-    // Dials
-    const latest = syntheticSoilMoisture.at(-1);
+    // --- Use the same logic as main.js to extract and scale values ---
+    const soilData = fakeDSSData.soil || {};
+    const dialDepths = ["2", "6", "10", "14"];
+    const scaleTo30 = v => v == null ? null : Math.min(v, 30);
+    const fcArr = dialDepths.map(depth => scaleTo30(soilData[depth]?.fc));
+    const mawdArr = dialDepths.map(depth => scaleTo30(soilData[depth]?.mawd));
+    const latest = fakeDSSData.irrimeter['1h'].at(-1);
     const levels = [
-      latest.moisture_1,
-      latest.moisture_2,
-      latest.moisture_3,
-      latest.moisture_4
+      scaleTo30(latest.moisture_1),
+      scaleTo30(latest.moisture_2),
+      scaleTo30(latest.moisture_3),
+      scaleTo30(latest.moisture_4)
     ];
-    createDials(levels, 5, 11, 100);
+    createDials(levels, mawdArr, fcArr, 30);
 
-    // Time Series Graphs
-    createRainfallGraph(timestamps, syntheticRain);
-    createIrrigationGraph(timestamps, syntheticIrrigation);
-    createEvapotranspirationGraph(timestamps, syntheticET);
+    // --- Use the same plotting functions as main.js ---
+    const irrimeterTimestamps = fakeDSSData.irrimeter['1h'].map(entry => new Date(entry.timestamp));
+    const rainfallData = fakeDSSData.davis['1h'].map(d => d.measured_rain_mm_h);
+    const irrigationData = fakeDSSData.campbell['1h'].map(d => d.measurement);
+    const etData = fakeDSSData.davis['1h'].map(d => d.potential_evapotranspiration_mm_h);
+    createRainfallGraph(irrimeterTimestamps, rainfallData);
+    createIrrigationGraph(irrimeterTimestamps, irrigationData);
+    createEvapotranspirationGraph(irrimeterTimestamps, etData);
     updateSoilMoistureGraph(fakeDSSData);
 
-    // Dropdown interaction
+    // --- Show last data time for each chart (top right) ---
+    function setLastPointLabel(spanId, timestamps, data, valueSuffix = '') {
+      if (!timestamps.length || !data.length) return;
+      const lastTime = new Date(timestamps[timestamps.length - 1]);
+      const lastValue = data[data.length - 1];
+      const timeStr = lastTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById(spanId).textContent = `(${lastValue.toFixed(2)}${valueSuffix}, ${timeStr})`;
+    }
+    setLastPointLabel('rainfallLastPointTop', irrimeterTimestamps, rainfallData, ' mm/h');
+    setLastPointLabel('irrigationLastPointTop', irrimeterTimestamps, irrigationData, ' h/h');
+    setLastPointLabel('evapotranspirationLastPointTop', irrimeterTimestamps, etData, ' mm/h');
+    setLastPointLabel('soilMoistureLastPointTop', irrimeterTimestamps, fakeDSSData.irrimeter['1h'].map(d => d.moisture_1), '%');
+
+    // --- Dropdown interaction for soil moisture ---
     document.getElementById('soilMoistureLevel').onchange = () => {
       updateSoilMoistureGraph(fakeDSSData);
+      const level = document.getElementById('soilMoistureLevel').value;
+      setLastPointLabel('soilMoistureLastPointTop', irrimeterTimestamps, fakeDSSData.irrimeter['1h'].map(d => d[`moisture_${level}`]), '%');
     };
   </script>
 </body>

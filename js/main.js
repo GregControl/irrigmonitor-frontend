@@ -75,16 +75,23 @@ async function triggerStep(authToken) {
 async function getDataAndPlot(authToken) {
   return new Promise(resolve => {
     fetchDSSData(authToken, (data) => {
-      // This callback is the same as your current fetchDSSData usage
       dssData = data;
       const irrimeterData = data.irrimeter?.['1h'] || [];
       const davisData = data.davis?.['1h'] || [];
       const campbellData = data.campbell?.['1h'] || [];
+      const soilData = data.soil || {};
+
       if (!irrimeterData.length || !davisData.length || !campbellData.length) {
         console.warn("Incomplete data received.");
         resolve();
         return;
       }
+
+      // Extract per-depth fc and mawd for dials (2, 6, 10, 14)
+      const dialDepths = ["2", "6", "10", "14"];
+      // Do NOT cap values, just use raw values for true scaling
+      const fcArr = dialDepths.map(depth => soilData[depth]?.fc ?? null);
+      const mawdArr = dialDepths.map(depth => soilData[depth]?.mawd ?? null);
       const latest = irrimeterData.at(-1);
       const levels = [
         latest.moisture_1,
@@ -92,7 +99,7 @@ async function getDataAndPlot(authToken) {
         latest.moisture_3,
         latest.moisture_4
       ];
-      createDials(levels, 5, 11, 40);
+      createDials(levels, mawdArr, fcArr, 15); // Set maxValue to 30 for all dials
       const irrimeterTimestamps = irrimeterData.map(entry => new Date(entry.timestamp));
       const davisTimestamps = davisData.map(entry => new Date(entry.timestamp));
       const campbellTimestamps = campbellData.map(entry => new Date(entry.timestamp));
@@ -168,12 +175,18 @@ window.onload = () => {
     const irrimeterData = data.irrimeter?.['1h'] || [];
     const davisData = data.davis?.['1h'] || [];
     const campbellData = data.campbell?.['1h'] || [];
+    const soilData = data.soil || {};
 
     if (!irrimeterData.length || !davisData.length || !campbellData.length) {
       console.warn("Incomplete data received.");
       return;
     }
 
+    // Extract per-depth fc and mawd for dials (2, 6, 10, 14)
+    const dialDepths = ["2", "6", "10", "14"];
+    // Do NOT cap values, just use raw values for true scaling
+    const fcArr = dialDepths.map(depth => soilData[depth]?.fc ?? null);
+    const mawdArr = dialDepths.map(depth => soilData[depth]?.mawd ?? null);
     const latest = irrimeterData.at(-1);
     const levels = [
       latest.moisture_1,
@@ -182,7 +195,7 @@ window.onload = () => {
       latest.moisture_4
     ];
 
-    createDials(levels, 5, 11, 40);
+    createDials(levels, mawdArr, fcArr, 15); // Set maxValue to 30 for all dials
     // Use each dataset's own timestamps for plotting
     const irrimeterTimestamps = irrimeterData.map(entry => new Date(entry.timestamp));
     const davisTimestamps = davisData.map(entry => new Date(entry.timestamp));

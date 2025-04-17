@@ -19,6 +19,9 @@ const dialCharts = {};
  * @param {number} maxValue - Maximum sensor reading
  */
 export function createDial(canvasId, value, label, mawd, fc, maxValue) {
+  // Debug log to help understand dial scaling
+  console.log('createDial', { canvasId, value, mawd, fc, maxValue, scaledValue: (value / maxValue) * 100 });
+
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext('2d');
   const container = canvas.parentElement;
@@ -36,7 +39,8 @@ export function createDial(canvasId, value, label, mawd, fc, maxValue) {
   const scaledValue = (value / maxValue) * 100;
   const scaledMawd = (mawd / maxValue) * 100;
   const scaledFc = (fc / maxValue) * 100;
-
+  
+  
   // Set background zone ranges (threshold bands)
   const referenceThresholds = [
     scaledMawd, 
@@ -104,7 +108,7 @@ export function createDial(canvasId, value, label, mawd, fc, maxValue) {
  * 
  * Customize labels or number of dials here.
  */
-export function createDials(moistureLevels, mawd, fc, maxValue) {
+export function createDials(moistureLevels, mawdArr, fcArr, maxValue) {
   const labels = [
     '2" Soil Moisture',
     '6" Soil Moisture',
@@ -113,8 +117,14 @@ export function createDials(moistureLevels, mawd, fc, maxValue) {
   ];
 
   for (let i = 0; i < 4; i++) {
-    if (moistureLevels[i] !== undefined) {
-      createDial(`dial${i + 1}`, moistureLevels[i], labels[i], mawd, fc, maxValue);
+    if (
+      moistureLevels[i] !== undefined &&
+      mawdArr && fcArr &&
+      mawdArr[i] != null &&
+      fcArr[i] != null
+    ) {
+      createDial(`dial${i + 1}`, moistureLevels[i], labels[i], mawdArr[i], fcArr[i], maxValue);
     }
+    // Optionally, handle missing values (e.g., show placeholder or skip)
   }
 }
