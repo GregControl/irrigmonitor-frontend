@@ -8,6 +8,7 @@
   <!-- Chart.js and dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@4.1.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css" />
@@ -155,7 +156,7 @@
     createRainfallGraph(irrimeterTimestamps, rainfallData);
     createIrrigationGraph(irrimeterTimestamps, irrigationData);
     createEvapotranspirationGraph(irrimeterTimestamps, etData);
-    updateSoilMoistureGraph(fakeDSSData);
+    updateSoilMoistureGraph(fakeDSSData); // This will now show annotation bands
 
     // --- Show last data time for each chart (top right) ---
     function setLastPointLabel(spanId, timestamps, data, valueSuffix = '') {
