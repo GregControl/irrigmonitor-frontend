@@ -144,7 +144,7 @@ body, html {
 }
 
 .soil-moisture-container {
-  height: calc((100vh - 260px) / 4 + 30px);
+  aspect-ratio: 2 / 1;
 }
 
 .dropdown-container {

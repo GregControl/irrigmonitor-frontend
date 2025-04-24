@@ -27,16 +27,25 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
     type: chartType,
     data: {
       labels,
-      datasets: [{
-        data,
-        backgroundColor: chartType === 'bar' ? lineColor.replace('0.8', '0.6') : lineColor,
-        borderColor: lineColor,
-        fill: false,
-        tension: chartType === 'line' ? graphOptions.tension : 0,
-        pointRadius: chartType === 'line' ? graphOptions.pointRadius : 0,
-        pointHitRadius: 5,
-        borderWidth: chartType === 'bar' ? 2 : graphOptions.borderWidth
-      }]
+      datasets: [
+        Object.assign(
+          {
+            data,
+            backgroundColor: chartType === 'bar' ? lineColor.replace('0.8', '0.6') : lineColor,
+            borderColor: lineColor,
+            fill: false,
+            tension: chartType === 'line' ? graphOptions.tension : 0,
+            pointRadius: chartType === 'line' ? graphOptions.pointRadius : 0,
+            pointHitRadius: 5,
+            borderWidth: chartType === 'bar' ? 2 : graphOptions.borderWidth,
+          },
+          chartType === 'bar' ? {
+            barPercentage: 1.0,
+            categoryPercentage: 1.0,
+            barThickness: 'flex'
+          } : {}
+        )
+      ]
     },
     options: {
       responsive: true,
@@ -45,6 +54,7 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
       scales: {
         x: {
           type: 'time',
+          offset: false,
           time: {
             unit: 'day',
             tooltipFormat: 'MM/dd HH:mm',
@@ -111,15 +121,15 @@ export function createTimeSeriesGraph(canvasId, labels, data, lineColor, existin
 export let rainfallChart, irrigationChart, evapotranspirationChart, soilMoistureChart;
 
 export function createRainfallGraph(timestamps, data) {
-  rainfallChart = createTimeSeriesGraph('rainfallGraph', timestamps, data, graphOptions.lineColor.rainfall, rainfallChart, 'line', AXIS_FONT_SIZE);
+  rainfallChart = createTimeSeriesGraph('rainfallGraph', timestamps, data, graphOptions.lineColor.rainfall, rainfallChart, 'bar', AXIS_FONT_SIZE);
 }
 
 export function createIrrigationGraph(timestamps, data) {
-  irrigationChart = createTimeSeriesGraph('irrigationGraph', timestamps, data, graphOptions.lineColor.irrigation, irrigationChart, 'line', AXIS_FONT_SIZE);
+  irrigationChart = createTimeSeriesGraph('irrigationGraph', timestamps, data, graphOptions.lineColor.irrigation, irrigationChart, 'bar', AXIS_FONT_SIZE);
 }
 
 export function createEvapotranspirationGraph(timestamps, data) {
-  evapotranspirationChart = createTimeSeriesGraph('evapotranspirationGraph', timestamps, data, graphOptions.lineColor.evapotranspiration, evapotranspirationChart, 'line', AXIS_FONT_SIZE);
+  evapotranspirationChart = createTimeSeriesGraph('evapotranspirationGraph', timestamps, data, graphOptions.lineColor.evapotranspiration, evapotranspirationChart, 'bar', AXIS_FONT_SIZE);
 }
 
 export function updateSoilMoistureGraph(dssData) {
