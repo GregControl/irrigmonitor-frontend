@@ -122,15 +122,16 @@ body, html {
 }
 
 .graph-container {
-  flex: none;
-  height: calc((100vh - 260px) / 4);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1; /* Chart container will be twice as wide as it is tall */
   background: #2a3738;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
-  position: relative;
+  overflow: hidden;
 }
 
 .graph-container:last-child {
