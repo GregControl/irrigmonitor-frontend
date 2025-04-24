@@ -1,31 +1,31 @@
 <!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>IrrigMonitor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IrrigMonitor</title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="https://forecastbucketsmart.s3.amazonaws.com/smartdrop2.png.webp" />
+  <!-- Favicon -->
+  <link rel="icon" href="https://forecastbucketsmart.s3.amazonaws.com/smartdrop2.png.webp" />
 
-    <!-- Chart.js and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+  <!-- Chart.js and date adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
-        <div class="tab" onclick="showTab('post')">Submit User Data</div>
-    </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+    <div class="tab" onclick="showTab('post')">Submit User Data</div>
+  </div>
 
-    <button id="unitToggle" style="position: absolute; top: 10px; right: 100px; padding: 5px 8px; font-size: 14px;">in/h</button>
+  <button id="unitToggle" style="position:absolute; top:10px; right:100px; padding:5px 8px; font-size:14px;">in/h</button>
 
     <!-- DASHBOARD VIEW -->
     <div id="dashboard" class="tab-content active">

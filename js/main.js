@@ -1,23 +1,34 @@
 // main.js
 
+// ==== Cognito login redirect ====
 import { getAuthToken } from './auth.js';
-import { showTab, initUI } from './ui.js';
-import { fetchDSSData } from './api.js';
-import { attachFormListener } from './form.js';
-import { createDials } from './charts/dials.js';
-import {
-  createRainfallGraph,
-  createIrrigationGraph,
-  createEvapotranspirationGraph,
-  updateSoilMoistureGraph
-} from './charts/timeseries.js';
+window.showTab = showTab;
+
+
+// If there's no token in the URL, send the user to Cognito Hosted UI
+const token = getAuthToken();
+if (!token) {
+  const COGNITO_DOMAIN = 'my-api-new.auth.us-east-1.amazoncognito.com';
+  const CLIENT_ID     = '5t3p84ebffon94fljcqr3249sm';
+  const SCOPES        = 'openid+email+phone';
+  // build a redirect URI based on current origin
+  const redirectUri   = encodeURIComponent(`${window.location.origin}/index.html`);
+
+  const loginUrl =
+    `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}` +
+    `&response_type=token&scope=${SCOPES}` +
+    `&redirect_uri=${redirectUri}`;
+
+  window.location.replace(loginUrl);
+}
+
+const authToken = token;
+let dssData = null;
 
 // Set default unit to inches per hour
 window.selectedUnit = 'in';
 
 // Helper: Conversion factor (1 mm = 0.0393701 inches)
-// When the selected unit is 'mm', factor is 1 (data remains in mm),
-// otherwise, if 'in', convert from mm to inches.
 function getConversionFactor() {
   return window.selectedUnit === 'mm' ? 1 : 0.0393701;
 }
@@ -33,6 +44,7 @@ function updateGraphHeaders() {
           .parentElement.querySelector('h3').textContent = `Potential Evapotranspiration (${unitSuffix})`;
 }
 
+
 // Update the last point label for a chart
 function setLastPointLabel(spanId, timestamps, data, valueSuffix = '') {
   if (!timestamps.length || !data.length) return;
@@ -42,10 +54,16 @@ function setLastPointLabel(spanId, timestamps, data, valueSuffix = '') {
   document.getElementById(spanId).textContent = `(${lastValue.toFixed(2)}${valueSuffix}, ${timeStr})`;
 }
 
-const authToken = getAuthToken();
-let dssData = null;
-
-window.showTab = showTab;
+import { showTab, initUI } from './ui.js';
+import { fetchDSSData } from './api.js';
+import { attachFormListener } from './form.js';
+import { createDials } from './charts/dials.js';
+import {
+  createRainfallGraph,
+  createIrrigationGraph,
+  createEvapotranspirationGraph,
+  updateSoilMoistureGraph
+} from './charts/timeseries.js';
 
 // --- Automated Data Refresh Logic ---
 let pollingActive = false;
